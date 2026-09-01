@@ -1,0 +1,33 @@
+module addsub(a,b,control,c);
+
+input [3:0] a,b;
+input control;
+output reg [3:0] c;
+
+always @ *
+begin
+
+if (control == 0)
+c = a + b;
+else if (control == 1)
+c = a - b;
+end
+
+endmodule
+
+module testbench();
+
+reg [3:0] a,b;
+reg control;
+wire [3:0] c;
+
+addsub uut(a,b,control,c);
+
+initial 
+begin
+ a = 4'b0000; b = 4'b0101; control = 0;
+    #50;
+    a = 4'b0110; b = 4'b0011; control = 1;
+    #50;
+end
+endmodule
