@@ -1,0 +1,68 @@
+module alu1bit(a, b, carryin, binv, select, result, carryout);
+
+input a, b;
+input carryin;
+input binv;
+input [1:0] select;
+output reg result;
+output reg carryout;
+
+reg m;
+reg sum;
+reg cout;
+
+always @ * 
+begin 
+m = b ^ binv;
+{cout, sum} = a + m + carryin;
+result = 0;
+carryout = 0;
+
+if (select == 2'b00)
+result = a & b;
+else if (select == 2'b01)
+result = a | b;
+else if (select == 2'b10)
+begin
+result = sum;
+carryout = cout;
+end
+else 
+result = 0;
+end
+
+endmodule
+
+module testbench();
+
+reg a, b, carryin, binv;
+reg [1:0] select;
+wire result, carryout;
+
+alu1bit uut(a, b, carryin, binv, select, result, carryout);
+
+initial
+begin
+
+select = 2'b00;
+    a = 0; b = 1; carryin = 0; binv = 0; #10;
+    a = 1; b = 1; #10;
+
+
+select = 2'b01;
+    a = 0; b = 0; #10;
+    a = 1; b = 0; #10;
+
+select = 2'b10;
+    binv = 0; carryin = 0; // addition
+    a = 0; b = 1; #10;
+    a = 1; b = 1; #10;
+
+    binv = 1; carryin = 1; // subtraction
+    a = 0; b = 1; #10;
+    a = 1; b = 0; #10;
+end
+
+endmodule
+
+

@@ -1,0 +1,46 @@
+module alu#(parameter N = 4) (
+    input [N-1:0] a,
+    input [N-1:0] b,
+    input [2:0] control,
+    output reg [N-1:0] result
+);
+
+always @*
+begin
+    case (control)
+
+        3'b000: result = a + b;   // add
+        3'b001: result = a - b;   // sub
+        3'b010: result = a & b;   // and
+        3'b011: result = a | b;   // or
+        3'b100: result = ~a;      // not
+        3'b101: result = a ^ b;   // xor
+        default: result = 0; 
+    endcase
+end
+
+endmodule 
+
+
+module testbench();
+
+reg [3:0] a, b;
+reg [2:0] control;
+wire [3:0] result;
+
+ALU #(4) uut(a, b, control, result);
+
+initial
+begin
+    a = 5; b = 3;
+
+    control = 3'b000; #10;
+    control = 3'b001; #10;
+    control = 3'b010; #10;
+    control = 3'b011; #10;
+    control = 3'b100; #10;
+    control = 3'b101; #10;
+
+end
+
+endmodule 

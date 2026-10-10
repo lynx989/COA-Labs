@@ -1,0 +1,110 @@
+module alu (a, b, alu_op, result, zero);
+
+input [31:0] a, b;
+input [3:0] alu_op;
+output reg [31:0] result;
+output zero;
+
+always @* 
+begin
+    case (alu_op)
+
+        4'b0000: result = a + b;                 // add
+        4'b0001: result = a - b;                 // sub
+        4'b0010: result = a & b;                 // and
+        4'b0011: result = a | b;                 // or
+        4'b0100: result = a ^ b;                 // xor
+
+        // slt: signed less than
+        4'b0101: begin
+            if (a[31] != b[31])
+                result = a[31] ? 1 : 0;
+            else if ($signed(a) < $signed(b))
+                result = 1;
+            else
+                result = 0;
+        end
+
+        // sltu: unsigned less than
+        4'b0110: begin
+            if (a < b)
+                result = 1;
+            else
+                result = 0;
+        end
+
+        4'b0111: result = a << b[4:0];             // sll
+        4'b1000: result = a >> b[4:0];             // srl
+        4'b1001: result = $signed(a) >>> b[4:0];   // sra
+
+        default: 
+	result = 0;
+
+    endcase
+end
+
+assign zero = (result == 0);
+
+endmodule
+
+
+module testbench();
+
+reg [31:0] a, b;
+reg [3:0] alu_op;
+
+wire [31:0] result;
+wire zero;
+
+alu uut(a, b, alu_op, result, zero);
+
+initial begin
+
+    // ADD: 5 + 3 = 8
+    a = 5; b = 3;
+    alu_op = 4'b0000; #10;
+
+    // SUB: 5 - 3 = 2
+    alu_op = 4'b0001; #10;
+
+    // AND: 5 AND 3 = 1
+    alu_op = 4'b0010; #10;
+
+    // OR: 5 OR 3 = 7
+    alu_op = 4'b0011; #10;
+
+    // XOR: 5 XOR 3 = 6
+    alu_op = 4'b0100; #10;
+
+    // SLT: 5 < 3 is false = 0
+    alu_op = 4'b0101; #10;
+
+    // SLTU: 5 < 3 is false = 0
+    alu_op = 4'b0110; #10;
+
+    // SLL: 5 << 3 = 40
+    alu_op = 4'b0111; #10;
+
+    // SRL: 40 >> 3 = 5
+    a = 40; b = 3;
+    alu_op = 4'b1000; #10;
+
+    // SRA: shift negative number right by 2
+    a = 32'hFFFFFFF0; b = 2;
+    alu_op = 4'b1001; #10;
+
+    // Test zero flag: 5 - 5 = 0
+    a = 5; b = 5;
+    alu_op = 4'b0001; #10;
+
+    $finish;
+end
+
+initial begin
+    $monitor("Time=%0t | OP=%b | A=%d | B=%d | RESULT=%d | ZERO=%b",
+             $time, alu_op, a, b, result, zero);
+end
+
+endmodule
+
+
